@@ -124,16 +124,29 @@ export function OrdersClient({
     }
   };
 
-  const updatePaymentStatus = async (orderId: string, paymentStatus: string) => {
+  const updatePaymentStatus = async (orderId: string, paymentStatus: string, riderId?: string) => {
     setLoadingAction(true);
     try {
+      const payload: any = {
+        paymentStatus,
+        notes: `GCash Payment ${paymentStatus === 'PAID' ? 'Verified & Approved' : 'Rejected'} by Admin`,
+      };
+
+      // Automatically transition order to READY_FOR_DELIVERY so it immediately enters Rider queue
+      if (paymentStatus === 'PAID') {
+        payload.status = 'READY_FOR_DELIVERY';
+      }
+
+      // If a rider was chosen, assign the order directly
+      if (riderId) {
+        payload.riderId = riderId;
+        payload.status = 'ASSIGNED';
+      }
+
       const res = await fetch(`/api/admin/orders/${orderId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          paymentStatus,
-          notes: `Payment marked as ${paymentStatus}`,
-        }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -486,24 +499,24 @@ export function OrdersClient({
                   {activeOrder.paymentStatus !== 'PAID' ? (
                     <div className="pt-1 flex flex-wrap items-center gap-2">
                       <button
-                        onClick={() => updatePaymentStatus(activeOrder.id, 'PAID')}
+                        onClick={() => updatePaymentStatus(activeOrder.id, 'PAID', selectedRiderId || undefined)}
                         disabled={loadingAction}
-                        className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center space-x-1.5 shadow-md shadow-emerald-600/20 active:scale-98 transition-all"
+                        className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center space-x-1.5 shadow-md shadow-emerald-600/20 active:scale-98 transition-all"
                       >
                         <CheckCircle2 className="w-4 h-4" />
-                        <span>Aprubahan ang GCash Payment</span>
+                        <span>Aprubahan at Ipasok sa Rider Queue</span>
                       </button>
 
                       <button
                         onClick={() => updatePaymentStatus(activeOrder.id, 'FAILED')}
                         disabled={loadingAction}
-                        className="px-3.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs border border-rose-200 transition-colors"
+                        className="px-3.5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs border border-rose-200 transition-colors"
                       >
                         Mali ang Reference / Tanggihan
                       </button>
 
-                      <span className="text-[11px] text-amber-800 italic">
-                        * Pindutin ang "Aprubahan" kapag na-check na sa GCash station account.
+                      <span className="text-[11px] text-amber-800 italic block w-full mt-1">
+                        * Kusa itong lalabas agad sa Rider App kapag na-aprubahan na ang bayad.
                       </span>
                     </div>
                   ) : (

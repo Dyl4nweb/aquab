@@ -26,12 +26,16 @@ import { OfficialReceiptModal } from '@/components/OfficialReceiptModal';
 
 interface RiderClientProps {
   initialAssignments: any[];
+  initialAvailableOrders?: any[];
   rider: any;
 }
 
-export function RiderClient({ initialAssignments, rider }: RiderClientProps) {
+export function RiderClient({ initialAssignments, initialAvailableOrders = [], rider }: RiderClientProps) {
   const [assignments, setAssignments] = useState(initialAssignments);
-  const [activeTab, setActiveTab] = useState<'ACTIVE' | 'COMPLETED' | 'ALL'>('ACTIVE');
+  const [availableOrders, setAvailableOrders] = useState<any[]>(initialAvailableOrders);
+  const [activeTab, setActiveTab] = useState<'ACTIVE' | 'AVAILABLE' | 'COMPLETED' | 'ALL'>(
+    initialAvailableOrders.length > 0 && initialAssignments.length === 0 ? 'AVAILABLE' : 'ACTIVE'
+  );
 
   // Complete Delivery Modal
   const [completeModalOpen, setCompleteModalOpen] = useState(false);
@@ -52,6 +56,30 @@ export function RiderClient({ initialAssignments, rider }: RiderClientProps) {
 
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+
+  // Claim/Accept an available approved order
+  const claimOrder = async (orderId: string) => {
+    setLoading(true);
+    setErrorMsg('');
+    try {
+      const res = await fetch('/api/rider/deliveries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      // Add newly claimed assignment to assignments and remove from availableOrders
+      setAssignments((prev) => [data.assignment, ...prev]);
+      setAvailableOrders((prev) => prev.filter((o) => o.id !== orderId));
+      setActiveTab('ACTIVE');
+    } catch (err: any) {
+      setErrorMsg(err.message || 'May error sa pagtanggap ng delivery.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredAssignments = assignments.filter((a) => {
     if (activeTab === 'ACTIVE') {
@@ -167,13 +195,51 @@ export function RiderClient({ initialAssignments, rider }: RiderClientProps) {
         </button>
       </header>
 
+      {/* Alert Banner for New Available Orders */}
+      {availableOrders.length > 0 && (
+        <div
+          onClick={() => setActiveTab('AVAILABLE')}
+          className="cursor-pointer bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-4 rounded-3xl shadow-lg shadow-emerald-600/25 flex items-center justify-between transition-transform hover:scale-[1.01] active:scale-[0.99] border border-emerald-400/40"
+        >
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center font-black text-lg animate-pulse">
+              🔔
+            </div>
+            <div>
+              <strong className="text-sm font-black block leading-tight">
+                May {availableOrders.length} Bagong Order na Ready i-Deliver!
+              </strong>
+              <span className="text-[11px] text-emerald-100 block mt-0.5">
+                Inaprubahan na ng Admin. Pindutin para tanggapin.
+              </span>
+            </div>
+          </div>
+          <span className="text-xs font-black bg-white text-emerald-800 px-3.5 py-1.5 rounded-xl shadow-sm shrink-0">
+            Buksan →
+          </span>
+        </div>
+      )}
+
       {/* Tabs */}
-      <div className="grid grid-cols-3 gap-1.5 bg-slate-200/80 p-1.5 rounded-2xl text-xs font-bold">
+      <div className="grid grid-cols-4 gap-1 bg-slate-200/80 p-1.5 rounded-2xl text-[11px] font-bold">
+        <button
+          onClick={() => setActiveTab('AVAILABLE')}
+          className={`py-2 px-1 rounded-xl transition-all relative ${
+            activeTab === 'AVAILABLE'
+              ? 'bg-emerald-600 text-white shadow-sm font-black'
+              : 'text-slate-700 hover:text-slate-900'
+          }`}
+        >
+          <span>Available ({availableOrders.length})</span>
+          {availableOrders.length > 0 && activeTab !== 'AVAILABLE' && (
+            <span className="w-2 h-2 rounded-full bg-emerald-500 absolute top-1.5 right-1.5 animate-ping" />
+          )}
+        </button>
         <button
           onClick={() => setActiveTab('ACTIVE')}
-          className={`py-2 rounded-xl transition-all ${
+          className={`py-2 px-1 rounded-xl transition-all ${
             activeTab === 'ACTIVE'
-              ? 'bg-white text-sky-700 shadow-sm'
+              ? 'bg-white text-sky-700 shadow-sm font-black'
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
@@ -181,19 +247,19 @@ export function RiderClient({ initialAssignments, rider }: RiderClientProps) {
         </button>
         <button
           onClick={() => setActiveTab('COMPLETED')}
-          className={`py-2 rounded-xl transition-all ${
+          className={`py-2 px-1 rounded-xl transition-all ${
             activeTab === 'COMPLETED'
-              ? 'bg-white text-sky-700 shadow-sm'
+              ? 'bg-white text-sky-700 shadow-sm font-black'
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          Completed ({completedCount})
+          Done ({completedCount})
         </button>
         <button
           onClick={() => setActiveTab('ALL')}
-          className={`py-2 rounded-xl transition-all ${
+          className={`py-2 px-1 rounded-xl transition-all ${
             activeTab === 'ALL'
-              ? 'bg-white text-sky-700 shadow-sm'
+              ? 'bg-white text-sky-700 shadow-sm font-black'
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
@@ -210,7 +276,165 @@ export function RiderClient({ initialAssignments, rider }: RiderClientProps) {
 
       {/* Delivery Cards List */}
       <div className="space-y-4">
-        {filteredAssignments.length === 0 ? (
+        {activeTab === 'AVAILABLE' ? (
+          availableOrders.length === 0 ? (
+            <div className="bg-white rounded-3xl p-8 text-center border border-slate-200 space-y-3">
+              <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
+              <h3 className="font-bold text-slate-800 text-sm">Walang Nakapilang Order</h3>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                Kapag nag-apruba si Admin ng GCash o may bagong delivery order mula sa customer, agad itong lalabas dito para matanggap mo.
+              </p>
+            </div>
+          ) : (
+            availableOrders.map((order) => {
+              const isCOD = order.paymentMethod === 'CASH_ON_DELIVERY';
+              return (
+                <div
+                  key={order.id}
+                  className="bg-white rounded-3xl border-2 border-emerald-500/40 shadow-md p-5 space-y-4 relative overflow-hidden"
+                >
+                  <div className="absolute top-0 right-0 bg-emerald-600 text-white text-[10px] font-black uppercase px-3 py-1 rounded-bl-xl tracking-wider">
+                    {order.paymentStatus === 'PAID' ? 'GCash Bayad Na' : 'Ready for Delivery'}
+                  </div>
+
+                  {/* Header: Order Number & Delivery Slot */}
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3 pr-28">
+                    <div>
+                      <span className="font-mono text-sm font-black text-sky-700 block">
+                        {order.orderNumber}
+                      </span>
+                      <span className="text-[10px] text-slate-400">
+                        Slot: {order.deliveryTimeSlot || 'Standard Delivery'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Customer & Call / Map Action Buttons */}
+                  <div className="space-y-3">
+                    <div>
+                      <strong className="text-sm font-bold text-slate-900 block">
+                        {order.customerName}
+                      </strong>
+                      <div className="flex items-start space-x-1.5 text-xs text-slate-600 mt-1">
+                        <MapPin className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
+                        <span>
+                          {order.deliveryAddress} (<strong>{order.barangayName || order.barangay?.name || 'Lingayen'}</strong>)
+                        </span>
+                      </div>
+                      {order.landmarkOrNotes && (
+                        <p className="text-[11px] text-slate-500 italic pl-5 mt-0.5">
+                          Landmark: {order.landmarkOrNotes}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Direct Action Buttons for Rider */}
+                    <div className="grid grid-cols-2 gap-2 pt-1">
+                      <a
+                        href={`tel:${order.customerPhone}`}
+                        className="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center space-x-1.5 shadow-sm active:scale-95 transition-all"
+                      >
+                        <Phone className="w-3.5 h-3.5" />
+                        <span>Tawagan si Customer</span>
+                      </a>
+
+                      <a
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                          `${order.deliveryAddress}, ${order.barangayName || order.barangay?.name || 'Lingayen'}, Pangasinan`
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="py-2.5 px-3 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 font-bold text-xs flex items-center justify-center space-x-1.5 active:scale-95 transition-all"
+                      >
+                        <Navigation className="w-3.5 h-3.5" />
+                        <span>Buksan sa Maps</span>
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Gallon Exchange Callout */}
+                  {order.exchangeGallonsCount > 0 && (
+                    <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3 flex items-center space-x-2 text-xs text-amber-900">
+                      <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                      <span>
+                        <strong>KUKUHA NG {order.exchangeGallonsCount} EMPTY GALLON(S)</strong> mula kay customer.
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Items Summary */}
+                  <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100 space-y-1.5 text-xs">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                      Mga Ide-deliver:
+                    </span>
+                    {order.items?.map((item: any) => (
+                      <div key={item.id} className="flex justify-between items-center text-slate-800">
+                        <span>
+                          <strong>{item.quantity}x</strong> {item.productName}
+                        </span>
+                        <span className="text-[11px] text-slate-500">
+                          {item.isExchange ? 'Refill' : 'Bagong Container'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Payment Breakdown */}
+                  <div className="flex items-center justify-between text-xs p-3 rounded-xl bg-slate-100 font-medium">
+                    <div className="flex items-center space-x-1.5">
+                      <Banknote className="w-4 h-4 text-slate-500" />
+                      <span>
+                        {isCOD ? (
+                          <strong className="text-emerald-700">Cash on Delivery (Kukubra):</strong>
+                        ) : (
+                          <strong className="text-blue-700">GCash Bayad Na (Aprubado):</strong>
+                        )}
+                      </span>
+                    </div>
+                    <span className="text-base font-black text-slate-900">
+                      ₱{order.totalAmount.toFixed(2)}
+                    </span>
+                  </div>
+
+                  {/* GCash Verification Details */}
+                  {order.paymentMethod === 'GCASH' && (
+                    <div className="bg-emerald-50 border border-emerald-300 rounded-2xl p-2.5 text-xs text-emerald-950 flex items-center space-x-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span className="text-[11px]">
+                        <strong>GCash Bayad Na (Aprubado ng Admin):</strong> Ref: <strong>{order.gcashReference || 'Inaprubahan'}</strong>. Huwag nang maningil ng pera sa customer.
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Show Receipt Button */}
+                  <button
+                    type="button"
+                    onClick={() => setReceiptOrder(order)}
+                    className="w-full py-2.5 rounded-2xl bg-sky-50 hover:bg-sky-100 text-sky-800 font-bold text-xs flex items-center justify-center space-x-2 border border-sky-200 shadow-sm active:scale-98 transition-all"
+                  >
+                    <FileText className="w-4 h-4 text-sky-600" />
+                    <span>Silipin ang Resibo / Image (PNG)</span>
+                  </button>
+
+                  {/* CLAIM & START DELIVERY BUTTON */}
+                  <div className="pt-2 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={() => claimOrder(order.id)}
+                      disabled={loading}
+                      className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-xs flex items-center justify-center space-x-2 shadow-lg shadow-emerald-600/30 active:scale-98 transition-all disabled:opacity-50"
+                    >
+                      <Truck className="w-4 h-4" />
+                      <span>{loading ? 'Kinukuha...' : '🚚 Tanggapin at Simulan ang Delivery (On My Way)'}</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )
+        ) : filteredAssignments.length === 0 ? (
           <div className="bg-white rounded-3xl p-8 text-center border border-slate-200 space-y-3">
             <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
               <Truck className="w-6 h-6" />
