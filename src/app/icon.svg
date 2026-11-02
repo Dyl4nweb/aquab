@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+    <linearGradient id="dropHighlight" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#e0f2fe" />
+    </linearGradient>
+  </defs>
+
+  <!-- Squircle Background -->
+  <rect width="64" height="64" rx="18" fill="url(#bgGrad)" />
+
+  <!-- Shadow drop -->
+  <path d="M32 11 C32 11 15 30 15 41 C15 50.5 22.6 57 32 57 C41.4 57 49 50.5 49 41 C49 30 32 11 32 11 Z" fill="#0369a1" opacity="0.25" />
+
+  <!-- Main Droplet -->
+  <path d="M32 10 C32 10 16 29 16 40 C16 48.8 23.2 55 32 55 C40.8 55 48 48.8 48 40 C48 29 32 10 32 10 Z" fill="url(#dropHighlight)" />
+
+  <!-- Glossy Curve Highlight -->
+  <path d="M23 38 C23 31 27 24 30 19 C28.5 22.5 26.5 27.5 26.5 34 C26.5 41 30.5 46 32 47.5 C26.5 46.5 23 42.5 23 38 Z" fill="#38bdf8" opacity="0.6" />
+
+  <!-- Secondary mini droplet -->
+  <path d="M42 24 C42 24 37 30 37 34 C37 36.8 39.2 39 42 39 C44.8 39 47 36.8 47 34 C47 30 42 24 42 24 Z" fill="#ffffff" opacity="0.9" />
+
+  <!-- Letter B hint or small core bubble -->
+  <circle cx="32" cy="42" r="3.5" fill="#0284c7" opacity="0.9" />
+</svg>
+

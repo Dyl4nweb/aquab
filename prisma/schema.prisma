@@ -1,0 +1,309 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  RIDER
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  READY_FOR_DELIVERY
+  ASSIGNED
+  OUT_FOR_DELIVERY
+  DELIVERED
+  COMPLETED
+  CANCELLED
+  FAILED_DELIVERY
+}
+
+enum DeliveryMethod {
+  DELIVERY
+  PICKUP
+}
+
+enum PaymentMethod {
+  CASH_ON_DELIVERY
+  GCASH
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+enum InventoryTxType {
+  STOCK_IN
+  STOCK_OUT
+  ADJUSTMENT
+  ORDER_FULFILLMENT
+  CONTAINER_RETURN
+}
+
+model User {
+  id              String                  @id @default(uuid())
+  name            String
+  email           String                  @unique
+  password        String
+  pin             String?
+  role            Role                    @default(ADMIN)
+  phone           String?
+  isActive        Boolean                 @default(true)
+  assignments     DeliveryAssignment[]
+  auditLogs       AuditLog[]
+  statusHistories OrderStatusHistory[]
+  inventoryTx     InventoryTransaction[]
+  payments        Payment[]
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+
+  @@index([role])
+  @@index([pin])
+}
+
+model ProductCategory {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  displayOrder Int      @default(0)
+  isActive    Boolean   @default(true)
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Product {
+  id                  String                 @id @default(uuid())
+  name                String
+  slug                String                 @unique
+  description         String?
+  categoryId          String
+  category            ProductCategory        @relation(fields: [categoryId], references: [id])
+  waterType           String                 @default("Purified Water")
+  containerType       String                 @default("Round Gallon")
+  capacity            String                 @default("18.9L (5 Gallons)")
+  price               Float                  @default(35.00)
+  supportsExchange    Boolean                @default(false)
+  newContainerFee     Float                  @default(180.00)
+  imageUrl            String                 @default("/images/products/round-gallon.png")
+  stock               Int                    @default(50)
+  minStockAlert       Int                    @default(10)
+  isActive            Boolean                @default(true)
+  isFeatured          Boolean                @default(false)
+  orderItems          OrderItem[]
+  inventoryTx         InventoryTransaction[]
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+
+  @@index([categoryId])
+  @@index([isActive])
+}
+
+model Barangay {
+  id                       String     @id @default(uuid())
+  name                     String     @unique
+  municipality             String     @default("Lingayen, Pangasinan")
+  deliveryFee              Float      @default(20.00)
+  minOrderAmount           Float      @default(0.00)
+  estimatedDeliveryMinutes Int        @default(45)
+  isActive                 Boolean    @default(true)
+  orders                   Order[]
+  customers                Customer[]
+  createdAt                DateTime   @default(now())
+  updatedAt                DateTime   @updatedAt
+}
+
+model Customer {
+  id             String    @id @default(uuid())
+  name           String
+  phone          String    @unique
+  address        String?
+  barangayId     String?
+  barangay       Barangay? @relation(fields: [barangayId], references: [id], onDelete: SetNull)
+  barangayName   String?
+  notes          String?
+  isSuki         Boolean   @default(false)
+  currentBalance Float     @default(0.00)
+  creditLimit    Float     @default(1000.00)
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([phone])
+  @@index([isSuki])
+  @@index([isActive])
+}
+
+model Order {
+  id                    String                @id @default(uuid())
+  orderNumber           String                @unique
+  customerName          String
+  customerPhone         String
+  deliveryAddress       String
+  barangayId            String?
+  barangay              Barangay?             @relation(fields: [barangayId], references: [id])
+  barangayName          String?
+  landmarkOrNotes       String?
+  deliveryMethod        DeliveryMethod        @default(DELIVERY)
+  deliveryDate          String
+  deliveryTimeSlot      String
+  deliveryFee           Float                 @default(0.00)
+  subtotal              Float                 @default(0.00)
+  totalAmount           Float                 @default(0.00)
+  status                OrderStatus           @default(PENDING)
+  cancellationReason    String?
+  paymentMethod         PaymentMethod         @default(CASH_ON_DELIVERY)
+  paymentStatus         PaymentStatus         @default(PENDING)
+  gcashReference        String?
+  gcashProofUrl         String?
+  exchangeGallonsCount  Int                   @default(0)
+  newGallonsCount       Int                   @default(0)
+  items                 OrderItem[]
+  assignments           DeliveryAssignment[]
+  statusHistory         OrderStatusHistory[]
+  payments              Payment[]
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  @@index([orderNumber])
+  @@index([customerPhone])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id             String   @id @default(uuid())
+  orderId        String
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId      String?
+  product        Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productName    String
+  waterType      String
+  containerType  String
+  capacity       String
+  price          Float
+  isExchange     Boolean  @default(false)
+  containerFee   Float    @default(0.00)
+  quantity       Int
+  subtotal       Float
+  createdAt      DateTime @default(now())
+
+  @@index([orderId])
+}
+
+model DeliveryAssignment {
+  id                 String       @id @default(uuid())
+  orderId            String
+  order              Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  riderId            String
+  rider              User         @relation(fields: [riderId], references: [id])
+  status             OrderStatus  @default(ASSIGNED)
+  assignedAt         DateTime     @default(now())
+  acceptedAt         DateTime?
+  deliveredAt        DateTime?
+  failedAt           DateTime?
+  failureReason      String?
+  cashCollected      Float?
+  deliveryNotes      String?
+  proofOfDeliveryUrl String?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  @@index([orderId])
+  @@index([riderId])
+  @@index([status])
+}
+
+model OrderStatusHistory {
+  id            String      @id @default(uuid())
+  orderId       String
+  order         Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status        OrderStatus
+  notes         String?
+  changedById   String?
+  changedBy     User?       @relation(fields: [changedById], references: [id])
+  changedByName String?
+  createdAt     DateTime    @default(now())
+
+  @@index([orderId])
+}
+
+model InventoryTransaction {
+  id             String          @id @default(uuid())
+  productId      String
+  product        Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  type           InventoryTxType
+  quantity       Int
+  previousStock  Int
+  newStock       Int
+  reason         String?
+  performedById  String?
+  performedBy    User?           @relation(fields: [performedById], references: [id])
+  createdAt      DateTime        @default(now())
+
+  @@index([productId])
+  @@index([createdAt])
+}
+
+model Payment {
+  id              String        @id @default(uuid())
+  orderId         String
+  order           Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amount          Float
+  method          PaymentMethod
+  status          PaymentStatus @default(PENDING)
+  referenceNumber String?
+  notes           String?
+  collectedById   String?
+  collectedBy     User?         @relation(fields: [collectedById], references: [id])
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([orderId])
+}
+
+model BusinessSetting {
+  id                  String   @id @default("default")
+  businessName        String   @default("Aqua B Water Station")
+  tagline             String   @default("Pure, Refreshing & Reliable Drinking Water Delivery")
+  municipality        String   @default("Lingayen, Pangasinan")
+  address             String   @default("Pangapisan North, Lingayen, Pangasinan")
+  phone               String   @default("+63 912 345 6789")
+  email               String   @default("support@aquabwater.ph")
+  openingHour         String   @default("07:00 AM")
+  closingHour         String   @default("07:00 PM")
+  operatingDays       String   @default("Monday to Sunday")
+  gcashNumber         String   @default("09123456789")
+  gcashName           String   @default("AQUA B WATER STATION")
+  defaultDeliveryFee  Float    @default(25.00)
+  containerDepositFee Float    @default(180.00)
+  announcement        String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+  action     String
+  entityType String
+  entityId   String?
+  details    String?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}

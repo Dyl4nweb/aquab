@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 520" width="400" height="520">
+  <defs>
+    <linearGradient id="gcashGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#005CE6"/>
+      <stop offset="100%" stop-color="#003580"/>
+    </linearGradient>
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#002b66" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- Background Card -->
+  <rect width="400" height="520" rx="28" fill="#ffffff"/>
+  <rect x="0" y="0" width="400" height="110" rx="28" fill="url(#gcashGrad)"/>
+  <rect x="0" y="80" width="400" height="30" fill="url(#gcashGrad)"/>
+
+  <!-- GCash Header Title -->
+  <text x="200" y="52" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="1">
+    GCash
+  </text>
+  <text x="200" y="80" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="700" fill="#E0EFFF" text-anchor="middle" letter-spacing="2">
+    SCAN TO PAY • AQUA B STATION
+  </text>
+
+  <!-- QR Code Container Box -->
+  <rect x="50" y="130" width="300" height="300" rx="24" fill="#ffffff" stroke="#E2E8F0" stroke-width="2" filter="url(#cardShadow)"/>
+
+  <!-- Simulated Crisp QR Code Pattern -->
+  <g fill="#0f172a">
+    <!-- Top-Left Finder Pattern -->
+    <rect x="75" y="155" width="70" height="70" rx="14" fill="#005CE6"/>
+    <rect x="85" y="165" width="50" height="50" rx="8" fill="#ffffff"/>
+    <rect x="95" y="175" width="30" height="30" rx="4" fill="#005CE6"/>
+
+    <!-- Top-Right Finder Pattern -->
+    <rect x="255" y="155" width="70" height="70" rx="14" fill="#005CE6"/>
+    <rect x="265" y="165" width="50" height="50" rx="8" fill="#ffffff"/>
+    <rect x="275" y="175" width="30" height="30" rx="4" fill="#005CE6"/>
+
+    <!-- Bottom-Left Finder Pattern -->
+    <rect x="75" y="335" width="70" height="70" rx="14" fill="#005CE6"/>
+    <rect x="85" y="345" width="50" height="50" rx="8" fill="#ffffff"/>
+    <rect x="95" y="355" width="30" height="30" rx="4" fill="#005CE6"/>
+
+    <!-- Center Water Droplet Icon Badge -->
+    <circle cx="200" cy="280" r="28" fill="#0284c7"/>
+    <path d="M200 262 C194 272, 186 282, 186 289 C186 297, 192 303, 200 303 C208 303, 214 297, 214 289 C214 282, 206 272, 200 262 Z" fill="#ffffff"/>
+
+    <!-- QR Data Modules / Dot Grid -->
+    <rect x="160" y="160" width="12" height="12" rx="2"/>
+    <rect x="180" y="160" width="12" height="12" rx="2"/>
+    <rect x="200" y="160" width="12" height="12" rx="2"/>
+    <rect x="225" y="160" width="12" height="12" rx="2"/>
+
+    <rect x="160" y="180" width="12" height="12" rx="2"/>
+    <rect x="225" y="180" width="12" height="12" rx="2"/>
+
+    <rect x="160" y="200" width="12" height="12" rx="2"/>
+    <rect x="180" y="200" width="12" height="12" rx="2"/>
+    <rect x="200" y="200" width="12" height="12" rx="2"/>
+    <rect x="225" y="200" width="12" height="12" rx="2"/>
+
+    <rect x="75" y="245" width="12" height="12" rx="2"/>
+    <rect x="95" y="245" width="12" height="12" rx="2"/>
+    <rect x="115" y="245" width="12" height="12" rx="2"/>
+    <rect x="135" y="245" width="12" height="12" rx="2"/>
+    <rect x="155" y="245" width="12" height="12" rx="2"/>
+
+    <rect x="245" y="245" width="12" height="12" rx="2"/>
+    <rect x="265" y="245" width="12" height="12" rx="2"/>
+    <rect x="285" y="245" width="12" height="12" rx="2"/>
+    <rect x="305" y="245" width="12" height="12" rx="2"/>
+
+    <rect x="75" y="270" width="12" height="12" rx="2"/>
+    <rect x="115" y="270" width="12" height="12" rx="2"/>
+    <rect x="145" y="270" width="12" height="12" rx="2"/>
+
+    <rect x="255" y="270" width="12" height="12" rx="2"/>
+    <rect x="285" y="270" width="12" height="12" rx="2"/>
+    <rect x="315" y="270" width="12" height="12" rx="2"/>
+
+    <rect x="75" y="295" width="12" height="12" rx="2"/>
+    <rect x="95" y="295" width="12" height="12" rx="2"/>
+    <rect x="135" y="295" width="12" height="12" rx="2"/>
+
+    <rect x="245" y="295" width="12" height="12" rx="2"/>
+    <rect x="275" y="295" width="12" height="12" rx="2"/>
+    <rect x="305" y="295" width="12" height="12" rx="2"/>
+
+    <rect x="160" y="335" width="12" height="12" rx="2"/>
+    <rect x="180" y="335" width="12" height="12" rx="2"/>
+    <rect x="200" y="335" width="12" height="12" rx="2"/>
+    <rect x="225" y="335" width="12" height="12" rx="2"/>
+
+    <rect x="160" y="360" width="12" height="12" rx="2"/>
+    <rect x="195" y="360" width="12" height="12" rx="2"/>
+    <rect x="225" y="360" width="12" height="12" rx="2"/>
+
+    <rect x="160" y="385" width="12" height="12" rx="2"/>
+    <rect x="180" y="385" width="12" height="12" rx="2"/>
+    <rect x="205" y="385" width="12" height="12" rx="2"/>
+    <rect x="225" y="385" width="12" height="12" rx="2"/>
+
+    <rect x="255" y="335" width="12" height="12" rx="2"/>
+    <rect x="285" y="335" width="12" height="12" rx="2"/>
+    <rect x="315" y="335" width="12" height="12" rx="2"/>
+
+    <rect x="265" y="360" width="12" height="12" rx="2"/>
+    <rect x="300" y="360" width="12" height="12" rx="2"/>
+
+    <rect x="255" y="385" width="12" height="12" rx="2"/>
+    <rect x="285" y="385" width="12" height="12" rx="2"/>
+    <rect x="315" y="385" width="12" height="12" rx="2"/>
+  </g>
+
+  <!-- Merchant Info Footer -->
+  <g text-anchor="middle">
+    <text x="200" y="462" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="800" fill="#0f172a">
+      AQUA B WATER REFILLING STATION
+    </text>
+    <text x="200" y="484" font-family="monospace" font-size="16" font-weight="700" fill="#005CE6" letter-spacing="1">
+      0917-888-2782
+    </text>
+    <text x="200" y="504" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600" fill="#64748b">
+      Pangapisan North, Lingayen, Pangasinan
+    </text>
+  </g>
+</svg>
+
