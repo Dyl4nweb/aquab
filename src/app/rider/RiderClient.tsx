@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { signOut } from 'next-auth/react';
+import { executeSignOut } from '@/lib/logout';
 import { 
   Truck, 
   Phone, 
@@ -158,11 +158,12 @@ export function RiderClient({ initialAssignments, rider }: RiderClientProps) {
         </div>
 
         <button
-          onClick={() => signOut({ callbackUrl: '/login' })}
-          className="p-2.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition-colors"
+          onClick={() => executeSignOut('/login')}
+          className="px-3 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-600 text-rose-300 hover:text-white transition-all border border-rose-500/30 flex items-center space-x-1.5 text-xs font-bold shadow-sm"
           title="Sign out"
         >
           <LogOut className="w-4 h-4" />
+          <span>Log Out</span>
         </button>
       </header>
 

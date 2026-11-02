@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
-import { useSession, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
+import { executeSignOut } from '@/lib/logout';
 import { 
   Droplets, 
   ShoppingCart, 
@@ -63,11 +64,12 @@ export function Navbar() {
                   <span>Dashboard</span>
                 </Link>
                 <button
-                  onClick={() => signOut({ callbackUrl: '/' })}
-                  className="text-xs hover:text-white flex items-center space-x-1"
+                  onClick={() => executeSignOut('/login')}
+                  className="text-xs bg-sky-800 hover:bg-rose-600 px-2 py-0.5 rounded font-semibold text-white flex items-center space-x-1 transition-colors"
                   title="Sign out"
                 >
                   <LogOut className="w-3 h-3" />
+                  <span>Log Out</span>
                 </button>
               </div>
             ) : (
@@ -220,13 +222,35 @@ export function Navbar() {
               Delivery Areas & Fees
             </Link>
             <div className="pt-2 border-t border-slate-100 flex flex-col space-y-2">
-              <Link
-                href="/login"
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-center text-sm font-semibold text-slate-600 py-2 border border-slate-200 rounded-lg"
-              >
-                Staff Portal Login
-              </Link>
+              {session ? (
+                <div className="space-y-2">
+                  <Link
+                    href={session.user && (session.user as any).role === 'RIDER' ? '/rider' : '/admin'}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block text-center text-sm font-bold bg-sky-600 hover:bg-sky-700 text-white py-2.5 rounded-xl shadow-sm transition-all"
+                  >
+                    Pumunta sa Staff Dashboard
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      executeSignOut('/login');
+                    }}
+                    className="w-full text-center text-sm font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 py-2.5 rounded-xl flex items-center justify-center space-x-1.5 transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>Mag-Log Out (Sign Out)</span>
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  href="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-center text-sm font-semibold text-slate-600 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                >
+                  Staff Portal Login
+                </Link>
+              )}
             </div>
           </div>
         )}

@@ -14,8 +14,11 @@ import {
   Settings, 
   Droplets, 
   ExternalLink,
-  ShieldCheck
+  ShieldCheck,
+  LogOut,
+  UserCheck
 } from 'lucide-react';
+import { executeSignOut } from '@/lib/logout';
 
 export function AdminSidebar({ role, user }: { role: string; user: any }) {
   const pathname = usePathname();
@@ -115,8 +118,8 @@ export function AdminSidebar({ role, user }: { role: string; user: any }) {
         )}
       </div>
 
-      {/* Footer / Storefront link */}
-      <div className="p-4 border-t border-slate-800 space-y-2">
+      {/* Footer: User profile & Logout */}
+      <div className="p-4 border-t border-slate-800 space-y-3">
         <Link
           href="/"
           target="_blank"
@@ -125,6 +128,35 @@ export function AdminSidebar({ role, user }: { role: string; user: any }) {
           <span>View Customer Storefront</span>
           <ExternalLink className="w-3.5 h-3.5" />
         </Link>
+
+        {/* Current user card */}
+        <div className="bg-slate-800/80 p-3 rounded-2xl border border-slate-700/60 flex items-center justify-between gap-2">
+          <div className="min-w-0">
+            <span className="text-xs font-bold text-white block truncate">
+              {user?.name || 'Staff User'}
+            </span>
+            <span className="text-[10px] text-sky-400 font-semibold uppercase tracking-wider block">
+              {isSuperAdmin ? 'Super Admin' : 'Admin User'}
+            </span>
+          </div>
+
+          <button
+            onClick={() => executeSignOut('/login')}
+            className="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white transition-all shadow-sm flex items-center justify-center shrink-0"
+            title="Mag-log out"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Explicit Sign Out Button */}
+        <button
+          onClick={() => executeSignOut('/login')}
+          className="w-full py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-rose-600 text-slate-300 hover:text-white text-xs font-bold transition-all flex items-center justify-center space-x-2 border border-slate-700/80 hover:border-rose-500 shadow-sm"
+        >
+          <LogOut className="w-3.5 h-3.5" />
+          <span>Mag-Log Out (Sign Out)</span>
+        </button>
       </div>
     </aside>
   );

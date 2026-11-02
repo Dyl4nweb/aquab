@@ -1,9 +1,9 @@
 'use client';
 
 import React from 'react';
-import { signOut } from 'next-auth/react';
 import Link from 'next/link';
 import { User, LogOut, ShieldCheck, MapPin, Bell } from 'lucide-react';
+import { executeSignOut } from '@/lib/logout';
 
 export function AdminTopNav({ user }: { user: any }) {
   const isSuperAdmin = user?.role === 'SUPER_ADMIN';
@@ -39,12 +39,12 @@ export function AdminTopNav({ user }: { user: any }) {
 
         {/* Logout */}
         <button
-          onClick={() => signOut({ callbackUrl: '/login' })}
-          className="p-2 rounded-xl text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors flex items-center space-x-1 text-xs font-semibold"
+          onClick={() => executeSignOut('/login')}
+          className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 hover:text-rose-800 border border-rose-200 transition-colors flex items-center space-x-1.5 text-xs font-bold shadow-sm"
           title="Sign out"
         >
-          <LogOut className="w-4 h-4" />
-          <span className="hidden sm:inline">Sign Out</span>
+          <LogOut className="w-3.5 h-3.5" />
+          <span>Sign Out</span>
         </button>
       </div>
     </header>
