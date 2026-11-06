@@ -2,9 +2,17 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Droplets, Phone, Mail, MapPin, Clock, ShieldCheck, Heart, Info, Banknote } from 'lucide-react';
 
 export function Footer() {
+  const pathname = usePathname();
+
+  // The footer should only appear on the landing page / home page
+  if (pathname !== '/') {
+    return null;
+  }
+
   return (
     <footer className="bg-slate-900 text-slate-300 pt-16 pb-12 border-t border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

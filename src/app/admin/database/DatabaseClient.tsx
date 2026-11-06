@@ -557,3 +557,4 @@ export function DatabaseClient({ initialStats }: { initialStats: DatabaseStats |
     </div>
   );
 }
+
