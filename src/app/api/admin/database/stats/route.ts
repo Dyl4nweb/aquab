@@ -63,8 +63,8 @@ export async function GET() {
     const sizeBytes = Number(dbInfo.size_bytes || 0);
     const sizeMB = sizeBytes / (1024 * 1024);
 
-    // Neon Free Tier default allocation is 512 MB (0.5 GB)
-    const maxStorageMB = 512;
+    // Neon Free Tier storage limit: 1 GB (1,024 MB)
+    const maxStorageMB = 1024;
     const usedPercentage = Math.min(100, Math.max(0, (sizeMB / maxStorageMB) * 100));
     const remainingMB = Math.max(0, maxStorageMB - sizeMB);
 

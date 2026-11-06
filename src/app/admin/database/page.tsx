@@ -53,7 +53,7 @@ export default async function AdminDatabasePage() {
     const dbInfo = dbSizeRes[0] || {};
     const sizeBytes = Number(dbInfo.size_bytes || 0);
     const sizeMB = sizeBytes / (1024 * 1024);
-    const maxStorageMB = 512;
+    const maxStorageMB = 1024; // 1 GB Neon Free Limit
     const usedPercentage = Math.min(100, Math.max(0, (sizeMB / maxStorageMB) * 100));
     const remainingMB = Math.max(0, maxStorageMB - sizeMB);
 

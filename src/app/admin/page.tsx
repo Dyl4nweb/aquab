@@ -37,7 +37,7 @@ export default async function AdminDashboardPage() {
       if (dbSizeRes?.[0]) {
         dbSizePretty = dbSizeRes[0].size_pretty || '8.8 MB';
         const bytes = Number(dbSizeRes[0].size_bytes || 0);
-        dbUsedPercent = Number(((bytes / (512 * 1024 * 1024)) * 100).toFixed(1));
+        dbUsedPercent = Number(((bytes / (1024 * 1024 * 1024)) * 100).toFixed(1));
       }
     } catch (e) {}
   }
@@ -383,7 +383,7 @@ export default async function AdminDashboardPage() {
                 <div className="flex justify-between text-[11px] text-slate-300">
                   <span>PostgreSQL Cloud (Neon)</span>
                   <strong className="text-white font-mono">
-                    {dbSizePretty} / 512 MB ({dbUsedPercent}%)
+                    {dbSizePretty} / 1 GB ({dbUsedPercent}%)
                   </strong>
                 </div>
                 <div className="w-full h-2.5 bg-slate-950 rounded-full overflow-hidden p-0.5 border border-slate-800">

@@ -215,7 +215,7 @@ export function DatabaseClient({ initialStats }: { initialStats: DatabaseStats |
                 <strong className="text-lg font-black text-white font-mono">
                   {stats?.sizePretty || `${stats?.sizeMB || 0} MB`}{' '}
                   <span className="text-xs text-slate-400 font-normal">
-                    / {stats?.maxStorageMB || 512} MB
+                    / {stats?.maxStorageMB ? (stats.maxStorageMB >= 1024 ? `${(stats.maxStorageMB / 1024).toFixed(0)} GB (${stats.maxStorageMB} MB)` : `${stats.maxStorageMB} MB`) : '1 GB (1,024 MB)'}
                   </span>
                 </strong>
               </div>
@@ -461,9 +461,9 @@ export function DatabaseClient({ initialStats }: { initialStats: DatabaseStats |
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-sky-900/90 pt-1">
           <div className="p-3 bg-white/80 rounded-2xl border border-sky-100 space-y-1">
-            <strong className="block text-slate-900 font-bold">1. 512 MB Free Tier</strong>
+            <strong className="block text-slate-900 font-bold">1. 1 GB Free Tier Storage</strong>
             <p className="text-[11px] text-slate-600">
-              Kasalukuyang may 512 MB storage limit sa Neon Cloud. Sa average na bulto ng refilling station, aabutin ito ng libu-libong orders bago mapuno.
+              Kasalukuyang may 1 GB (1,024 MB) libreng storage sa Neon PostgreSQL Cloud. Sa bulto ng inyong station, aabutin ito ng daan-daang libong orders bago mapuno.
             </p>
           </div>
 
