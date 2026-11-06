@@ -16,7 +16,8 @@ import {
   ExternalLink,
   ShieldCheck,
   LogOut,
-  UserCheck
+  UserCheck,
+  Database
 } from 'lucide-react';
 import { executeSignOut } from '@/lib/logout';
 
@@ -37,6 +38,7 @@ export function AdminSidebar({ role, user }: { role: string; user: any }) {
     { href: '/admin/barangays', label: 'Barangays & Fees', icon: MapPin },
     { href: '/admin/staff', label: 'Staff Management', icon: Users },
     { href: '/admin/settings', label: 'Business Settings', icon: Settings },
+    { href: '/admin/database', label: 'Database & Storage', icon: Database },
   ];
 
   return (

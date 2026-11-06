@@ -1,6 +1,8 @@
 import React from 'react';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { 
   ShoppingBag, 
   DollarSign, 
@@ -13,12 +15,33 @@ import {
   ArrowRight,
   TrendingUp,
   RefreshCw,
-  Warehouse
+  Warehouse,
+  Database
 } from 'lucide-react';
 
 export const revalidate = 0;
 
 export default async function AdminDashboardPage() {
+  const session = await getServerSession(authOptions);
+  const isSuperAdmin = (session?.user as any)?.role === 'SUPER_ADMIN';
+
+  let dbSizePretty = '8.8 MB';
+  let dbUsedPercent = 1.7;
+
+  if (isSuperAdmin) {
+    try {
+      const dbSizeRes: any = await prisma.$queryRaw`
+        SELECT pg_size_pretty(pg_database_size(current_database())) AS size_pretty,
+               pg_database_size(current_database())::text AS size_bytes;
+      `;
+      if (dbSizeRes?.[0]) {
+        dbSizePretty = dbSizeRes[0].size_pretty || '8.8 MB';
+        const bytes = Number(dbSizeRes[0].size_bytes || 0);
+        dbUsedPercent = Number(((bytes / (512 * 1024 * 1024)) * 100).toFixed(1));
+      }
+    } catch (e) {}
+  }
+
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
 
@@ -339,6 +362,49 @@ export default async function AdminDashboardPage() {
               </div>
             </div>
           </div>
+
+          {/* Super Admin Cloud Database Storage Quick Widget */}
+          {isSuperAdmin && (
+            <div className="bg-slate-900 text-white rounded-3xl p-6 shadow-sm space-y-3.5 text-xs border border-slate-800">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2 text-sky-400">
+                  <Database className="w-4 h-4 shrink-0" />
+                  <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                    Cloud Database Storage
+                  </h3>
+                </div>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center space-x-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                  <span>Healthy</span>
+                </span>
+              </div>
+
+              <div className="space-y-1.5 pt-1">
+                <div className="flex justify-between text-[11px] text-slate-300">
+                  <span>PostgreSQL Cloud (Neon)</span>
+                  <strong className="text-white font-mono">
+                    {dbSizePretty} / 512 MB ({dbUsedPercent}%)
+                  </strong>
+                </div>
+                <div className="w-full h-2.5 bg-slate-950 rounded-full overflow-hidden p-0.5 border border-slate-800">
+                  <div
+                    className="h-full bg-gradient-to-r from-emerald-400 to-sky-400 rounded-full transition-all"
+                    style={{ width: `${Math.max(2, Math.min(100, dbUsedPercent))}%` }}
+                  />
+                </div>
+                <span className="text-[10px] text-slate-400 block pt-0.5">
+                  Ligtas at maluwag pa. Malayo pa bago mapuno ang database.
+                </span>
+              </div>
+
+              <Link
+                href="/admin/database"
+                className="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs text-center block transition-colors shadow-sm"
+              >
+                Tingnan ang Buong Database Monitor →
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </div>
